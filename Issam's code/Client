@@ -1,0 +1,94 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+public class client_new{ 
+ 
+    static DataInputStream input;
+    static InputStream in;
+    String name;
+    String pin;
+    String saldo;
+    String PIN = "1234";
+    String cardID = "C0452E";
+    String iban;
+    String state;
+    String aantal_pog;
+    update new_value;
+    String update_saldo;
+    
+    public static void main(String[] args) {
+        client_new client = new client_new();
+        client.connection();
+    }
+    
+    public String Saldo(){
+        return saldo;
+    }
+    
+    public String iban(){
+        return iban;
+    }
+    
+    public String state(){
+        return state;
+    }
+    
+    public String aantal_pog(){
+        return aantal_pog;
+    }
+
+    public void connection(){
+        String serverName = "145.24.222.201";
+        int port = 8080;
+        update update = new update();
+        try{
+            Socket s = new Socket(serverName, port);
+            System.out.println("Connected");
+            OutputStream out = s.getOutputStream();
+            DataOutputStream data = new DataOutputStream(out);
+            data.writeUTF(cardID);
+            data.writeUTF(PIN); 
+            Thread.sleep(50);
+            in = s.getInputStream();
+            input = new DataInputStream(in);
+            name = input.readUTF();
+            pin = name.substring(0, 4);
+            iban = name.substring(4, 18);
+            state = name.substring(18 , 19);
+            aantal_pog = name.substring(19, 20);
+            saldo = name.substring(20);
+            System.out.println("Saldo " + saldo + " Pincode " + pin);
+            System.out.println("IBAN " + iban + " aantal pogingen " + aantal_pog + " state " + state);
+            int old_saldo = Integer.parseInt(saldo);
+            System.out.println("we gaan hier wat printen " + old_saldo);
+            Thread.sleep(2000);
+            int new_saldo = update.getSaldo();
+            update_saldo = Integer.toString(old_saldo);
+            if(old_saldo != new_saldo){
+                update_saldo = Integer.toString(new_saldo);
+            }
+            System.out.println(update_saldo);
+            String new_aantal_pog = update.getAantalpog();
+            System.out.println(new_aantal_pog);
+            String new_state = update.getState();
+            System.out.println(new_state);
+            String command = "UPDATE";
+            String up_to = command + new_aantal_pog + new_state + update_saldo ;
+            data.writeUTF(up_to);
+            System.out.println(up_to);
+            Thread.sleep(50);
+        } catch (Exception ex) {
+
+        }
+    }
+}
